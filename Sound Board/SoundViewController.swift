@@ -13,14 +13,21 @@ class SoundViewController: UIViewController {
     
     @IBOutlet weak var recordButton: UIButton!
     
+    @IBOutlet weak var addButton: UIButton!
     @IBOutlet weak var nameTextField: UITextField!
+    @IBOutlet weak var playButton: UIButton!
     
     var audioRecorder : AVAudioRecorder?
+    
+    var audioPlayer : AVAudioPlayer?
+    
+    var audioURL : URL?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupRecorder()
+        playButton.isEnabled = false
     }
     
     func setupRecorder() {
@@ -35,7 +42,7 @@ class SoundViewController: UIViewController {
             
             let basePath : String = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
             let pathComponents = [basePath, "audio.m4a"]
-            let audioURL = NSURL.fileURL(withPathComponents: pathComponents)!
+            audioURL = NSURL.fileURL(withPathComponents: pathComponents)!
             
             // Create settings for audio recorder
             
@@ -46,7 +53,7 @@ class SoundViewController: UIViewController {
             
             // Create AudioRecorder Object
             
-            audioRecorder = try AVAudioRecorder(url: audioURL, settings: settings)
+            audioRecorder = try AVAudioRecorder(url: audioURL!, settings: settings)
             audioRecorder!.prepareToRecord()
         } catch let error as NSError {
             print(error)
@@ -59,9 +66,30 @@ class SoundViewController: UIViewController {
     }
     
     @IBAction func recordTapped(_ sender: Any) {
+        
+        if audioRecorder!.isRecording {
+            // Stop the recording
+            audioRecorder?.stop()
+            
+            // Change button title to Record
+            recordButton.setTitle("Record", for: .normal)
+            
+            playButton.isEnabled = true
+        } else {
+            // Start the recording
+            audioRecorder?.record()
+            
+            // Change button title to Stop
+            recordButton.setTitle("Stop", for: .normal)
+        }
+        
     }
     
     @IBAction func playTapped(_ sender: Any) {
+        do {
+            try audioPlayer = AVAudioPlayer(contentsOf: audioURL!)
+            audioPlayer!.play()
+        } catch {}
     }
     
     @IBAction func addTapped(_ sender: Any) {
